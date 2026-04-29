@@ -24,6 +24,11 @@ public class JwtRequest implements Serializable {
         this.username = username;
     }
 
+    // Allow "login" field from JSON
+    public void setLogin(String login) {
+        this.username = login;
+    }
+
     public String getPassword() {
         return password;
     }

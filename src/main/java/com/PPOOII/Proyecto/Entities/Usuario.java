@@ -16,9 +16,9 @@ public class Usuario implements Serializable {
 	private UsuarioPersonaId id;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "id_persona", referencedColumnName = "id_persona", insertable = false, updatable = false)
+    @JoinColumn(name = "idpersona", referencedColumnName = "id", insertable = false, updatable = false)
 	private Persona persona;
-
+	
 	@Column(name = "password", nullable = false, length = 255)
 	private String password;
 

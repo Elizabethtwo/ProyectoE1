@@ -30,7 +30,7 @@ public class PersonaServiceImpl implements IPersonaService {
                 return false;
             }
             personaRepository.save(persona);
-            logger.info("PERSONA GUARDADA: " + persona.getIdPersona());
+            logger.info("PERSONA GUARDADA: " + persona.getId());
             return true;
         } catch (Exception e) {
             logger.error("ERROR GUARDAR_PERSONA: " + e.getMessage());
@@ -41,16 +41,16 @@ public class PersonaServiceImpl implements IPersonaService {
     @Override
     public boolean actualizar(Persona persona) {
         try {
-            if (persona == null || persona.getIdPersona() == null) {
+            if (persona == null || persona.getId() == null) {
                 logger.error("ERROR ACTUALIZAR_PERSONA: La persona o su ID es nulo.");
                 return false;
             }
-            if (!personaRepository.existsById(persona.getIdPersona())) {
-                logger.error("ERROR ACTUALIZAR_PERSONA: No existe la persona con ID: " + persona.getIdPersona());
+            if (!personaRepository.existsById(persona.getId())) {
+                logger.error("ERROR ACTUALIZAR_PERSONA: No existe la persona con ID: " + persona.getId());
                 return false;
             }
             personaRepository.save(persona);
-            logger.info("PERSONA ACTUALIZADA: " + persona.getIdPersona());
+            logger.info("PERSONA ACTUALIZADA: " + persona.getId());
             return true;
         } catch (Exception e) {
             logger.error("ERROR ACTUALIZAR_PERSONA: " + e.getMessage());

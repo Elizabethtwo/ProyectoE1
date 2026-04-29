@@ -16,10 +16,8 @@ public class Persona implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id_persona")
-	private Long idPersona;
-
-	@Column(name = "identificacion", nullable = false, unique = true, length = 30)
+    @Column(name = "id")
+    private Long id;
 	private String identificacion;
 
 	@Column(name = "tipo_identificacion", nullable = false, length = 5)
@@ -31,20 +29,20 @@ public class Persona implements Serializable {
 	@Column(name = "apellidos", nullable = false, length = 100)
 	private String apellidos;
 
-	@Column(name = "correo_electronico", nullable = false, length = 100)
-	private String correoElectronico;
+@Column(name = "correo", nullable = false, length = 100)
+    private String correo;
 
-	@Column(name = "tipo_persona", nullable = false, length = 2)
+	@Column(name = "tipo_persona", nullable = false, length = 1)
 	private String tipoPersona; // Ejemplo: C o A
 
 	// Getters y Setters
 
-	public Long getIdPersona() {
-		return idPersona;
+	public Long getId() {
+		return id;
 	}
 
-	public void setIdPersona(Long idPersona) {
-		this.idPersona = idPersona;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public String getIdentificacion() {
@@ -79,12 +77,12 @@ public class Persona implements Serializable {
 		this.apellidos = apellidos;
 	}
 
-	public String getCorreoElectronico() {
-		return correoElectronico;
+	public String getCorreo() {
+		return correo;
 	}
 
-	public void setCorreoElectronico(String correoElectronico) {
-		this.correoElectronico = correoElectronico;
+	public void setCorreo(String correo) {
+		this.correo = correo;
 	}
 
 	public String getTipoPersona() {

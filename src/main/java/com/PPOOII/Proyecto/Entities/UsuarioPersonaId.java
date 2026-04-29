@@ -10,7 +10,7 @@ public class UsuarioPersonaId implements Serializable {
 	@Column(name = "login")
 	private String login;
 
-	@Column(name = "id_persona")
+	@Column(name = "idpersona")
 	private Long idPersona;
 
 	public UsuarioPersonaId() {

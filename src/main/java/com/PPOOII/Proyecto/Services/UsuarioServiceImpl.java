@@ -98,7 +98,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     @Override
     public Usuario findByLogin(String login) {
         try {
-            return usuarioRepository.findByIdLogin(login).orElse(null);
+            return usuarioRepository.findById_Login(login).orElse(null);
         } catch (Exception e) {
             logger.error("ERROR FIND_BY_LOGIN: " + e.getMessage());
             return null;

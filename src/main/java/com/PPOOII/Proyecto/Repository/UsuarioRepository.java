@@ -11,9 +11,9 @@ import com.PPOOII.Proyecto.Entities.UsuarioPersonaId;
 @Repository("IUsuarioRepo")
 public interface UsuarioRepository extends JpaRepository<Usuario, UsuarioPersonaId> {
 
-    Optional<Usuario> findByIdLogin(String login);
+    Optional<Usuario> findById_Login(String login);
 
     Optional<Usuario> findByApikey(String apikey);
 
-    boolean existsByIdLogin(String login);
+    boolean existsById_Login(String login);
 }
