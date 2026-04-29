@@ -41,6 +41,14 @@ public class VehiculoDocumento implements Serializable {
     @Column(name = "ESTADO", nullable = false, length = 15)
     private String estado = "En Verificacion";
 
+    /**
+     * Campo para almacenar el documento PDF en BASE64
+     * Tipo BLOB en la base de datos
+     */
+    @Lob
+    @Column(name = "DOCUMENTO_BASE64", columnDefinition = "BLOB")
+    private byte[] documentoBase64;
+
     // Constructores
 
     public VehiculoDocumento() {}
@@ -73,6 +81,9 @@ public class VehiculoDocumento implements Serializable {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    public byte[] getDocumentoBase64() { return documentoBase64; }
+    public void setDocumentoBase64(byte[] documentoBase64) { this.documentoBase64 = documentoBase64; }
 
     @Override
     public String toString() {

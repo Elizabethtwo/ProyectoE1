@@ -48,6 +48,10 @@ public class Vehiculo implements Serializable {
     @OneToMany(mappedBy = "vehiculo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VehiculoDocumento> documentos;
 
+    @JsonManagedReference("vehiculo-conductor")
+    @OneToMany(mappedBy = "vehiculo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<VehiculoConductor> conductores;
+
     // Constructores
 
     public Vehiculo() {}
@@ -100,6 +104,9 @@ public class Vehiculo implements Serializable {
 
     public List<VehiculoDocumento> getDocumentos() { return documentos; }
     public void setDocumentos(List<VehiculoDocumento> documentos) { this.documentos = documentos; }
+
+    public List<VehiculoConductor> getConductores() { return conductores; }
+    public void setConductores(List<VehiculoConductor> conductores) { this.conductores = conductores; }
 
     @Override
     public String toString() {
