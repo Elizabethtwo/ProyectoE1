@@ -68,6 +68,24 @@ public class VehiculoServiceImpl implements IVehiculoService {
         return true;
     }
 
+    private boolean validarDatosVehiculo(Vehiculo vehiculo) {
+        if (vehiculo.getColor() == null || vehiculo.getColor().isBlank()
+                || vehiculo.getMarca() == null || vehiculo.getMarca().isBlank()
+                || vehiculo.getLinea() == null || vehiculo.getLinea().isBlank()) {
+            logger.error("ERROR VALIDAR_VEHICULO: Color, marca y línea son obligatorios.");
+            return false;
+        }
+        if (vehiculo.getCapacidadPasajeros() < 1) {
+            logger.error("ERROR VALIDAR_VEHICULO: La capacidad de pasajeros debe ser mayor a 0.");
+            return false;
+        }
+        if (vehiculo.getModelo() < 1900) {
+            logger.error("ERROR VALIDAR_VEHICULO: El modelo debe ser un año válido.");
+            return false;
+        }
+        return true;
+    }
+
     // Validacion de compatibilidad documento-vehiculo
     private boolean documentoAplicaAVehiculo(String tipoVehiculoDoc, String tipoVehiculo) {
         if ("AM".equals(tipoVehiculoDoc)) {
@@ -92,6 +110,9 @@ public class VehiculoServiceImpl implements IVehiculoService {
 
             // Validar valores permitidos (tipoVehiculo, tipoServicio, tipoCombustible)
             if (!validarValoresPermitidos(vehiculo)) {
+                return false;
+            }
+            if (!validarDatosVehiculo(vehiculo)) {
                 return false;
             }
             
@@ -162,10 +183,8 @@ public class VehiculoServiceImpl implements IVehiculoService {
                 return false;
             }
 
-            if (vehiculo.getTipoServicio() != null || vehiculo.getTipoCombustible() != null) {
-                if (!validarValoresPermitidos(vehiculo)) {
-                    return false;
-                }
+            if (!validarValoresPermitidos(vehiculo) || !validarDatosVehiculo(vehiculo)) {
+                return false;
             }
             
             if (vehiculo.getPlaca() != null && vehiculo.getTipoVehiculo() != null) {
