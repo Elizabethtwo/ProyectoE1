@@ -37,10 +37,7 @@ public class DocumentoController {
     // DELETE
     @DeleteMapping("/documento/{id}")
     public boolean eliminarDocumento(@PathVariable("id") long id) {
-        return documentoService.eliminar(id);
-    }
-
-    // GET: Listar todos 
+        return documentoService.eliminar(id);}
     @GetMapping("/documentos")
     public List<Documento> listarDocumentos(@NonNull Pageable pageable) {
         return documentoService.consultarDocumentos(pageable);
