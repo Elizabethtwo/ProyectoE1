@@ -3,6 +3,7 @@ package com.PPOOII.Proyecto.Entities;
 import java.io.Serializable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -49,6 +50,12 @@ public class Persona implements Serializable {
 	@Pattern(regexp = "C|A")
 	@Column(name = "tipo_persona", nullable = false, length = 1)
 	private String tipoPersona; // Ejemplo: C o A
+
+	@Column(name = "licencia_conduccion", columnDefinition = "BLOB")
+	private byte[] licenciaConduccion;
+
+	@Column(name = "fecha_vigencia_licencia")
+	private java.time.LocalDate fechaVigenciaLicencia;
 
 	// Getters y Setters
 
@@ -106,6 +113,22 @@ public class Persona implements Serializable {
 
 	public void setTipoPersona(String tipoPersona) {
 		this.tipoPersona = tipoPersona;
+	}
+
+	public byte[] getLicenciaConduccion() {
+		return licenciaConduccion;
+	}
+
+	public void setLicenciaConduccion(byte[] licenciaConduccion) {
+		this.licenciaConduccion = licenciaConduccion;
+	}
+
+	public java.time.LocalDate getFechaVigenciaLicencia() {
+		return fechaVigenciaLicencia;
+	}
+
+	public void setFechaVigenciaLicencia(java.time.LocalDate fechaVigenciaLicencia) {
+		this.fechaVigenciaLicencia = fechaVigenciaLicencia;
 	}
 
 	public Persona() {}

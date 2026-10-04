@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f5f1">
+  <title>Rutas | Movilidad</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172d2a;
+      --muted: #73817c;
+      --line: #e5eae5;
+      --paper: #fff;
+      --canvas: #f3f5f1;
+      --green: #176c55;
+      --green-dark: #10513f;
+      --mint: #e4f2eb;
+      --orange: #e88a55;
+      --danger: #a53f35;
+      --shadow: 0 20px 60px rgba(27, 54, 46, .08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--canvas); color: var(--ink); min-height: 100vh; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 28px 0 64px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 46px; }
+    .brand { display: flex; gap: 11px; align-items: center; font-weight: 750; letter-spacing: -.04em; font-size: 17px; }
+    .brand-mark { width: 36px; height: 36px; border-radius: 12px; color: white; background: var(--green); display: grid; place-items: center; }
+    .brand-mark svg { width: 21px; height: 21px; }
+    .api-status { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: rgba(255,255,255,.72); padding: 8px 12px; border-radius: 99px; color: var(--muted); font-size: 12px; font-weight: 650; }
+    .status-dot { width: 7px; height: 7px; background: #b7c0bc; border-radius: 50%; }
+    .api-status.ready .status-dot { background: #35a779; box-shadow: 0 0 0 3px #e1f4eb; }
+    .hero { display: grid; grid-template-columns: 1fr 320px; gap: 32px; align-items: end; margin-bottom: 30px; }
+    .eyebrow { color: var(--green); font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: .16em; margin: 0 0 13px; }
+    h1 { font-size: clamp(36px, 5vw, 58px); line-height: 1.02; letter-spacing: -.065em; margin: 0; max-width: 650px; font-weight: 760; }
+    h1 span { color: var(--green); }
+    .intro { color: var(--muted); line-height: 1.6; margin: 17px 0 0; max-width: 510px; font-size: 14px; }
+    .search-card { background: var(--green-dark); padding: 20px; border-radius: 18px; color: white; box-shadow: var(--shadow); }
+    .search-card label { display: block; color: #c0dbd0; font-size: 11px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; margin-bottom: 10px; }
+    .search-row { display: flex; gap: 8px; }
+    .search-row input { min-width: 0; flex: 1; height: 46px; border: 1px solid rgba(255,255,255,.24); outline: none; border-radius: 9px; background: rgba(255,255,255,.1); color: white; padding: 0 12px; font-size: 14px; }
+    .search-row input::placeholder { color: #acc6bb; }
+    .search-row input:focus { border-color: #a7d8c0; box-shadow: 0 0 0 3px rgba(167,216,192,.16); }
+    .search-row button { border: 0; border-radius: 9px; padding: 0 15px; background: #b7e1cb; color: #153c30; font-weight: 750; font-size: 13px; }
+    .search-row button:hover { background: #d1efde; }
+    .search-row button:disabled { cursor: wait; opacity: .7; }
+    .search-hint { font-size: 11px; color: #a8c4b7; margin: 11px 0 0; line-height: 1.5; }
+    .text-button { margin-top: 10px; padding: 0; border: 0; background: transparent; color: #d0ecdc; font-size: 11px; font-weight: 750; text-decoration: underline; text-underline-offset: 3px; }
+    .connection-card { background: var(--paper); border: 1px solid var(--line); border-radius: 15px; margin-bottom: 22px; overflow: hidden; }
+    .create-card { background: var(--paper); border: 1px solid var(--line); border-radius: 15px; margin-bottom: 22px; overflow: hidden; }
+    .create-card[hidden] { display: none; }
+    .create-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 19px; border-bottom: 1px solid var(--line); }
+    .create-title { font-size: 14px; font-weight: 750; }
+    .create-subtitle { color: var(--muted); font-size: 11px; margin: 4px 0 0; }
+    .create-body { padding: 19px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .create-body[hidden] { display: none; }
+    .create-note { color: #596964; background: #f5f8f5; border: 1px solid var(--line); border-radius: 9px; padding: 12px; font-size: 11px; line-height: 1.55; margin: 0; }
+    .stops-editor { grid-column: 1 / -1; }
+    .stops-editor-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .stops-editor-title { font-size: 12px; font-weight: 750; }
+    .stops-editor-count { color: var(--muted); font-size: 11px; margin-left: 6px; }
+    .add-stop-button { border: 1px solid #cfe0d5; background: #f2f8f4; color: var(--green); border-radius: 7px; padding: 7px 10px; font-size: 11px; font-weight: 750; }
+    .add-stop-button:disabled { cursor: not-allowed; opacity: .5; }
+    .stop-edit-row { display: grid; grid-template-columns: minmax(180px, 1.6fr) minmax(110px, 1fr) minmax(110px, 1fr) auto; gap: 10px; align-items: end; border: 1px solid var(--line); background: #fbfcfb; border-radius: 10px; padding: 11px; margin-top: 8px; }
+    .stop-edit-row .field label { font-size: 10px; }
+    .stop-edit-row .field input { height: 37px; width: 100%; }
+    .stop-position { color: var(--green); font-size: 10px; font-weight: 800; margin-bottom: 6px; }
+    .remove-stop-button { height: 37px; border: 1px solid #ecd8d4; background: #fff7f5; color: #97473d; border-radius: 7px; padding: 0 10px; font-size: 11px; font-weight: 700; }
+    .remove-stop-button:disabled { cursor: not-allowed; opacity: .4; }
+    .create-actions { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; }
+    .create-actions .primary-button:disabled { cursor: wait; opacity: .7; }
+    .connection-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 19px; }
+    .connection-title { display: flex; gap: 10px; align-items: center; font-size: 13px; font-weight: 750; }
+    .connection-title svg { width: 17px; color: var(--green); }
+    .connection-subtitle { color: var(--muted); font-size: 12px; margin: 3px 0 0 27px; }
+    .toggle { border: 0; background: transparent; color: var(--green); font-weight: 700; font-size: 12px; padding: 8px; }
+    .connection-body { border-top: 1px solid var(--line); padding: 18px 19px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .connection-body[hidden] { display: none; }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field.wide { grid-column: 1 / -1; }
+    .field label { font-size: 11px; font-weight: 750; color: #596964; }
+    .field input { height: 40px; border: 1px solid #dce3de; border-radius: 8px; background: #fbfcfb; padding: 0 11px; color: var(--ink); outline: none; font-size: 13px; }
+    .field input:focus { border-color: #76ab94; box-shadow: 0 0 0 3px #e7f3ec; }
+    .field-help { color: var(--muted); font-size: 11px; line-height: 1.5; margin: 0; }
+    .connection-actions { display: flex; gap: 10px; align-items: center; grid-column: 1 / -1; }
+    .primary-button { min-height: 40px; border: 0; background: var(--green); color: white; padding: 0 15px; border-radius: 8px; font-size: 12px; font-weight: 750; }
+    .primary-button:hover { background: var(--green-dark); }
+    .auth-message { color: var(--muted); font-size: 11px; margin: 0; }
+    .notice { display: none; padding: 13px 15px; border-radius: 10px; margin: 0 0 18px; font-size: 13px; line-height: 1.5; }
+    .notice.visible { display: block; }
+    .notice.error { color: #81332d; background: #fff0ed; border: 1px solid #f3d6d0; }
+    .notice.info { color: #345b4b; background: #edf6f0; border: 1px solid #d9eade; }
+    .results { display: none; }
+    .results.visible { display: block; }
+    .results-head { display: flex; justify-content: space-between; gap: 20px; align-items: end; margin: 38px 0 18px; }
+    .results-head h2 { font-size: 24px; letter-spacing: -.045em; margin: 0; }
+    .results-head p { color: var(--muted); font-size: 12px; margin: 6px 0 0; }
+    .stop-count { flex: none; color: var(--green); background: var(--mint); padding: 8px 11px; border-radius: 99px; font-size: 11px; font-weight: 750; }
+    .route-layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 18px; align-items: start; }
+    .stop-list { background: white; border: 1px solid var(--line); border-radius: 15px; padding: 6px 20px; }
+    .stop { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 14px; align-items: start; padding: 20px 0; position: relative; }
+    .stop + .stop { border-top: 1px solid #edf0ed; }
+    .stop-marker { position: relative; z-index: 1; display: grid; place-items: center; border: 1px solid #d9e7df; background: #edf6f0; color: var(--green); width: 34px; height: 34px; border-radius: 50%; font-size: 12px; font-weight: 800; }
+    .stop:first-child .stop-marker, .stop:last-child .stop-marker { background: var(--green); border-color: var(--green); color: white; }
+    .stop-type { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; margin: 0 0 5px; }
+    .stop-name { overflow-wrap: anywhere; font-size: 14px; font-weight: 700; line-height: 1.45; margin: 0; }
+    .coordinates { margin: 6px 0 0; color: #89958f; font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .map-link { display: inline-flex; align-items: center; gap: 5px; margin-top: 9px; color: var(--green); text-decoration: none; font-size: 11px; font-weight: 750; }
+    .map-link:hover { text-decoration: underline; }
+    .map-link svg { width: 13px; height: 13px; }
+    .route-map { background: white; border: 1px solid var(--line); border-radius: 15px; padding: 18px; margin-bottom: 18px; }
+    .route-map[hidden] { display: none; }
+    .map-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+    .map-head h3 { margin: 0; font-size: 14px; letter-spacing: -.02em; }
+    .map-head span { color: var(--muted); font-size: 11px; }
+    .map-frame { display: block; width: 100%; height: 390px; border: 0; border-radius: 10px; background: #edf2ee; }
+    .map-frame[hidden] { display: none; }
+    .map-message { color: var(--muted); font-size: 12px; line-height: 1.5; margin: 10px 0 0; }
+    .map-external-link { display: inline-block; margin-top: 8px; color: var(--green); font-size: 12px; font-weight: 750; text-decoration: none; }
+    .map-external-link:hover { text-decoration: underline; }
+    .route-summary { background: white; border: 1px solid var(--line); border-radius: 15px; padding: 19px; }
+    .summary-title { color: var(--muted); text-transform: uppercase; letter-spacing: .12em; font-size: 10px; font-weight: 800; margin: 0 0 15px; }
+    .summary-code { font-size: 20px; letter-spacing: -.04em; font-weight: 800; overflow-wrap: anywhere; }
+    .summary-divider { height: 1px; background: var(--line); margin: 17px 0; }
+    .summary-item { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; margin: 11px 0; }
+    .summary-item span:first-child { color: var(--muted); }
+    .summary-item span:last-child { font-weight: 700; text-align: right; }
+    .empty-state { background: white; border: 1px dashed #d7e0d9; border-radius: 15px; text-align: center; padding: 44px 20px; margin-top: 24px; }
+    .empty-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 16px; margin: 0 auto 14px; background: var(--mint); color: var(--green); }
+    .empty-icon svg { width: 23px; }
+    .empty-state h2 { margin: 0; font-size: 16px; letter-spacing: -.02em; }
+    .empty-state p { color: var(--muted); font-size: 12px; margin: 8px auto 0; max-width: 400px; line-height: 1.6; }
+    .footer { border-top: 1px solid var(--line); margin-top: 48px; padding-top: 17px; display: flex; justify-content: space-between; gap: 14px; color: #89958f; font-size: 10px; }
+    @media (max-width: 760px) {
+      .page { width: min(100% - 32px, 560px); padding-top: 18px; }
+      .topbar { margin-bottom: 34px; }
+      .hero { grid-template-columns: 1fr; gap: 23px; }
+      .search-card { width: 100%; }
+      .route-layout { grid-template-columns: 1fr; }
+      .route-summary { order: -1; }
+      .connection-body, .create-body { grid-template-columns: 1fr; }
+      .field.wide, .connection-actions, .stops-editor, .create-actions { grid-column: auto; }
+      .connection-head, .create-head { padding: 14px; }
+      .connection-body, .create-body { padding: 15px; }
+      .stop-edit-row { grid-template-columns: 1fr 1fr; }
+      .stop-edit-row .location-field { grid-column: 1 / -1; }
+    }
+    @media (max-width: 420px) {
+      .page { width: calc(100% - 24px); }
+      .brand { font-size: 15px; }
+      .api-status { font-size: 10px; padding: 7px 9px; }
+      .search-card { padding: 16px; }
+      .search-row button { padding: 0 11px; }
+      .stop-list { padding: 4px 13px; }
+      .stop { grid-template-columns: 34px minmax(0, 1fr); gap: 10px; }
+      .stop-marker { width: 31px; height: 31px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 19V5m0 0 4 4M5 5l-4 4M19 19V5m0 14-4-4m4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(2 0)"/></svg>
+        </span>
+        Movilidad <span style="font-weight:500;color:#73817c">/ Rutas</span>
+      </div>
+      <div class="api-status" id="apiStatus"><span class="status-dot"></span><span id="apiStatusText">Sin conexión</span></div>
+    </header>
+
+    <section class="hero" aria-labelledby="pageTitle">
+      <div>
+        <p class="eyebrow">Explora tu recorrido</p>
+        <h1 id="pageTitle">Cada parada,<br><span>en su camino.</span></h1>
+        <p class="intro">Consulta el trayecto completo de una ruta. Busca por su código para ver las paradas en orden y abrir sus ubicaciones en el mapa.</p>
+      </div>
+      <form class="search-card" id="searchForm">
+        <label for="routeCode">Código de ruta</label>
+        <div class="search-row">
+          <input id="routeCode" name="routeCode" maxlength="50" autocomplete="off" placeholder="Ej. RUTA-001" required>
+          <button id="searchButton" type="submit">Buscar ruta</button>
+        </div>
+        <p class="search-hint">Conéctate con tus credenciales para consultar las paradas.</p>
+        <button class="text-button" id="toggleCreate" type="button" aria-expanded="false">+ Crear una ruta nueva</button>
+      </form>
+    </section>
+
+    <section class="connection-card" aria-label="Conexión con la API">
+      <div class="connection-head">
+        <div>
+          <div class="connection-title">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.8"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V2a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9Z" stroke="currentColor" stroke-width="1.5" transform="translate(1 1) scale(.92)"/></svg>
+            Configura la conexión
+          </div>
+          <p class="connection-subtitle" id="connectionSubtitle">API y credenciales de acceso</p>
+        </div>
+        <button class="toggle" id="toggleSettings" type="button" aria-expanded="true">Ocultar</button>
+      </div>
+      <form class="connection-body" id="connectionForm">
+        <div class="field wide">
+          <label for="apiBase">URL de la API</label>
+          <input id="apiBase" type="url" value="http://localhost:9002" placeholder="http://localhost:9002" required>
+        </div>
+        <div class="field">
+          <label for="username">Usuario</label>
+          <input id="username" autocomplete="username" placeholder="Tu usuario" required>
+        </div>
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <input id="password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required>
+        </div>
+        <div class="field wide">
+          <label for="apiKey">API key administrativa</label>
+          <input id="apiKey" type="password" autocomplete="off" placeholder="APIKey de tu usuario">
+          <p class="field-help">El backend requiere JWT y API key para consultar rutas. Las credenciales solo se mantienen en esta página.</p>
+        </div>
+        <div class="field wide">
+          <label for="mapsApiKey">Google Maps Embed API key (opcional)</label>
+          <input id="mapsApiKey" type="password" autocomplete="off" placeholder="Clave restringida de Google Maps">
+          <p class="field-help">Es distinta de la API key administrativa. Si la dejas vacía se usa el iframe clásico de Google Maps; con una clave válida se usa Maps Embed API. Restringe la clave a esa API y a tu origen web.</p>
+        </div>
+        <div class="connection-actions">
+          <button class="primary-button" id="loginButton" type="submit">Iniciar sesión</button>
+          <p class="auth-message" id="authMessage" aria-live="polite">Aún no has iniciado sesión.</p>
+        </div>
+      </form>
+    </section>
+
+    <section class="create-card" id="createCard" hidden aria-label="Crear una ruta">
+      <div class="create-head">
+        <div>
+          <div class="create-title">Registrar una nueva ruta</div>
+          <p class="create-subtitle">Completa los datos del conductor, vehículo y recorrido.</p>
+        </div>
+        <button class="toggle" id="closeCreate" type="button">Cerrar</button>
+      </div>
+      <form class="create-body" id="createRouteForm">
+        <div class="field">
+          <label for="newRouteCode">Código de ruta</label>
+          <input id="newRouteCode" maxlength="50" placeholder="Ej. RUTA-001" required>
+        </div>
+        <div class="field">
+          <label for="driverId">ID del conductor</label>
+          <input id="driverId" type="number" min="1" step="1" placeholder="ID de persona tipo C" required>
+        </div>
+        <div class="field">
+          <label for="vehicleId">ID del vehículo</label>
+          <input id="vehicleId" type="number" min="1" step="1" placeholder="ID del vehículo" required>
+        </div>
+        <p class="create-note field wide">Necesitas iniciar sesión como administrador y usar su API key. El conductor debe ser tipo C, estar asociado a este vehículo en estado PO y el vehículo debe tener todos sus documentos vigentes y habilitados.</p>
+        <div class="stops-editor">
+          <div class="stops-editor-head">
+            <div><span class="stops-editor-title">Paradas del recorrido</span><span class="stops-editor-count" id="stopInputCount">2 de 7</span></div>
+            <button class="add-stop-button" id="addStopButton" type="button">+ Añadir parada</button>
+          </div>
+          <div id="stopInputs"></div>
+        </div>
+        <div class="create-actions">
+          <button class="primary-button" id="createRouteButton" type="submit">Crear ruta</button>
+          <p class="auth-message">Las paradas se enviarán en el orden mostrado.</p>
+        </div>
+      </form>
+    </section>
+
+    <div class="notice" id="notice" role="status" aria-live="polite"></div>
+
+    <section class="results" id="results" aria-live="polite">
+      <div class="results-head">
+        <div>
+          <h2 id="resultTitle">Ruta</h2>
+          <p id="resultSubtitle"></p>
+        </div>
+        <span class="stop-count" id="stopCount"></span>
+      </div>
+      <section class="route-map" id="routeMap" hidden aria-label="Mapa del recorrido">
+        <div class="map-head">
+          <h3>Mapa del recorrido</h3>
+          <span id="mapRouteLabel"></span>
+        </div>
+        <iframe class="map-frame" id="mapFrame" title="Mapa de la ruta" loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" hidden></iframe>
+        <p class="map-message" id="mapMessage" aria-live="polite"></p>
+        <a class="map-external-link" id="mapExternalLink" target="_blank" rel="noopener noreferrer" hidden>Abrir recorrido en Google Maps ↗</a>
+      </section>
+      <div class="route-layout">
+        <div class="stop-list" id="stopList"></div>
+        <aside class="route-summary" id="routeSummary"></aside>
+      </div>
+    </section>
+
+    <section class="empty-state" id="emptyState">
+      <div class="empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 19V5m0 0 4 4M5 5 1 9m18 10V5m0 14-4-4m4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" transform="translate(2 0)"/></svg></div>
+      <h2>Tu próximo recorrido empieza aquí</h2>
+      <p>Configura el acceso a la API, inicia sesión y busca una ruta existente o crea un nuevo recorrido desde el formulario.</p>
+    </section>
+
+    <footer class="footer"><span>Consulta de trayectos</span><span>Conectado a la API de movilidad</span></footer>
+  </main>
+
+  <script>
+    const $ = (selector) => document.querySelector(selector);
+    const form = $('#connectionForm');
+    const searchForm = $('#searchForm');
+    const apiBaseInput = $('#apiBase');
+    const notice = $('#notice');
+    const results = $('#results');
+    const emptyState = $('#emptyState');
+    let jwt = '';
+    let activeRouteStops = [];
+    let activeRouteCode = '';
+
+    function apiBase() {
+      return apiBaseInput.value.trim().replace(/\/+$/, '');
+    }
+
+    function setApiStatus(ready, text) {
+      $('#apiStatus').classList.toggle('ready', ready);
+      $('#apiStatusText').textContent = text;
+    }
+
+    function showNotice(message, type = 'error') {
+      notice.textContent = message;
+      notice.className = `notice visible ${type}`;
+    }
+
+    function clearNotice() {
+      notice.textContent = '';
+      notice.className = 'notice';
+    }
+
+    async function readError(response) {
+      const body = await response.text();
+      if (!body) return '';
+      try {
+        const parsed = JSON.parse(body);
+        return parsed.message || parsed.error || parsed.detail || body;
+      } catch {
+        return body;
+      }
+    }
+
+    function explainHttpError(status, detail) {
+      if (status === 401) return 'Sesión inválida o expirada. Inicia sesión nuevamente.';
+      if (status === 403) return detail || 'El servidor rechazó esta consulta con HTTP 403 y no devolvió el motivo. Revisa el log APIKeyAuthFilter del backend.';
+      if (status === 404) return 'No se encontró una ruta con ese código.';
+      return detail || `La API respondió con el estado ${status}.`;
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearNotice();
+      const loginButton = $('#loginButton');
+      const username = $('#username').value.trim();
+      const password = $('#password').value;
+      if (!apiBase() || !username || !password) {
+        showNotice('Completa la URL de la API, el usuario y la contraseña.');
+        return;
+      }
+      loginButton.disabled = true;
+      loginButton.textContent = 'Conectando…';
+      try {
+        const response = await fetch(`${apiBase()}/auth`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        if (!response.ok) {
+          const detail = await readError(response);
+          throw new Error(explainHttpError(response.status, detail));
+        }
+        const data = await response.json();
+        if (!data.jwt) throw new Error('La respuesta del inicio de sesión no contiene el token jwt esperado.');
+        jwt = data.jwt;
+        $('#authMessage').textContent = 'Sesión iniciada. Ya puedes consultar rutas.';
+        $('#connectionSubtitle').textContent = `Sesión activa para ${username}`;
+        setApiStatus(true, 'Sesión iniciada');
+        showNotice('Sesión iniciada correctamente. Ahora puedes buscar una ruta.', 'info');
+        $('#routeCode').focus();
+      } catch (error) {
+        jwt = '';
+        $('#authMessage').textContent = 'No se pudo iniciar sesión.';
+        setApiStatus(false, 'Sin conexión');
+        const message = error instanceof TypeError
+          ? 'No se pudo conectar con la API. Verifica la URL, que el backend esté activo y que permita solicitudes desde este origen (CORS).'
+          : error.message;
+        showNotice(message);
+      } finally {
+        loginButton.disabled = false;
+        loginButton.textContent = 'Iniciar sesión';
+      }
+    });
+
+    searchForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearNotice();
+      const code = $('#routeCode').value.trim();
+      const apiKey = $('#apiKey').value.trim();
+      if (!jwt) {
+        showNotice('Primero inicia sesión para obtener el token de acceso.');
+        $('#username').focus();
+        return;
+      }
+      if (!apiKey) {
+        showNotice('Ingresa la API key administrativa requerida para consultar las rutas.');
+        $('#apiKey').focus();
+        return;
+      }
+      if (!code) return;
+
+      const button = $('#searchButton');
+      button.disabled = true;
+      button.textContent = 'Buscando…';
+      try {
+        const response = await fetch(`${apiBase()}/v1/rutas/${encodeURIComponent(code)}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${jwt}`,
+            'APIKey': apiKey
+          }
+        });
+        if (!response.ok) {
+          const detail = await readError(response);
+          throw Object.assign(new Error(explainHttpError(response.status, detail)), { status: response.status });
+        }
+        const stops = await response.json();
+        if (!Array.isArray(stops) || stops.length === 0) {
+          showNotice('La API no devolvió paradas para este código de ruta.');
+          results.classList.remove('visible');
+          emptyState.style.display = '';
+          return;
+        }
+        renderRoute(stops, code);
+        setApiStatus(true, 'API conectada');
+      } catch (error) {
+        const message = error instanceof TypeError
+          ? 'No se pudo conectar con la API. Verifica la URL, que el backend esté activo y que permita solicitudes desde este origen (CORS).'
+          : error.message;
+        showNotice(message);
+        if (error.status === 401) {
+          jwt = '';
+          $('#authMessage').textContent = 'Sesión expirada. Inicia sesión nuevamente.';
+          setApiStatus(false, 'Sesión expirada');
+        }
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Buscar ruta';
+      }
+    });
+
+    const createForm = $('#createRouteForm');
+    const createCard = $('#createCard');
+    const stopInputs = $('#stopInputs');
+
+    function updateStopRows() {
+      const rows = [...stopInputs.querySelectorAll('.stop-edit-row')];
+      $('#stopInputCount').textContent = `${rows.length} de 7`;
+      $('#addStopButton').disabled = rows.length >= 7;
+      rows.forEach((row, index) => {
+        const position = index === 0 ? 'ORIGEN' : index === rows.length - 1 ? 'DESTINO' : `PARADA ${index + 1}`;
+        row.querySelector('.stop-position').textContent = `${position} · ${index + 1}`;
+        row.querySelector('.remove-stop-button').disabled = rows.length <= 2;
+      });
+    }
+
+    let stopRowId = 0;
+
+    function addStopRow() {
+      if (stopInputs.children.length >= 7) return;
+      const row = document.createElement('div');
+      const rowId = stopRowId++;
+      row.className = 'stop-edit-row';
+      row.innerHTML = `
+        <div class="field location-field">
+          <span class="stop-position"></span>
+          <label for="stop-location-${rowId}">Ubicación</label>
+          <input id="stop-location-${rowId}" class="stop-location" type="text" maxlength="255" placeholder="Nombre o dirección de la parada" required>
+        </div>
+        <div class="field">
+          <label for="stop-latitude-${rowId}">Latitud (opcional)</label>
+          <input id="stop-latitude-${rowId}" class="stop-latitude" type="number" min="-90" max="90" step="any" placeholder="4.6097">
+        </div>
+        <div class="field">
+          <label for="stop-longitude-${rowId}">Longitud (opcional)</label>
+          <input id="stop-longitude-${rowId}" class="stop-longitude" type="number" min="-180" max="180" step="any" placeholder="-74.0817">
+        </div>
+        <button class="remove-stop-button" type="button" aria-label="Eliminar parada">Quitar</button>`;
+      row.querySelector('.remove-stop-button').addEventListener('click', () => {
+        row.remove();
+        updateStopRows();
+      });
+      stopInputs.append(row);
+      updateStopRows();
+    }
+
+    function nullableNumber(input) {
+      return input.value === '' ? null : Number(input.value);
+    }
+
+    function setCreateFormVisible(visible) {
+      createCard.hidden = !visible;
+      $('#toggleCreate').setAttribute('aria-expanded', String(visible));
+      $('#toggleCreate').textContent = visible ? '− Cerrar formulario' : '+ Crear una ruta nueva';
+      if (visible) {
+        $('#newRouteCode').value = $('#routeCode').value.trim();
+        createCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    $('#toggleCreate').addEventListener('click', () => {
+      setCreateFormVisible(createCard.hidden);
+    });
+    $('#closeCreate').addEventListener('click', () => setCreateFormVisible(false));
+    $('#addStopButton').addEventListener('click', addStopRow);
+    addStopRow();
+    addStopRow();
+
+    createForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearNotice();
+      const apiKey = $('#apiKey').value.trim();
+      if (!jwt) {
+        showNotice('Primero inicia sesión para obtener el token de acceso.');
+        $('#username').focus();
+        return;
+      }
+      if (!apiKey) {
+        showNotice('Ingresa la API key del mismo usuario administrador con el que iniciaste sesión.');
+        $('#apiKey').focus();
+        return;
+      }
+
+      const button = $('#createRouteButton');
+      const code = $('#newRouteCode').value.trim();
+      const payload = {
+        idpersona: Number($('#driverId').value),
+        idvehiculo: Number($('#vehicleId').value),
+        codigoRuta: code,
+        paradas: [...stopInputs.querySelectorAll('.stop-edit-row')].map((row, ordenParada) => ({
+          ordenParada,
+          ubicacion: row.querySelector('.stop-location').value.trim(),
+          latitud: nullableNumber(row.querySelector('.stop-latitude')),
+          longitud: nullableNumber(row.querySelector('.stop-longitude'))
+        }))
+      };
+
+      button.disabled = true;
+      button.textContent = 'Creando…';
+      try {
+        const response = await fetch(`${apiBase()}/v1/rutas`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwt}`,
+            'APIKey': apiKey
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+          const detail = await readError(response);
+          throw Object.assign(new Error(explainHttpError(response.status, detail)), { status: response.status });
+        }
+        const createdStops = await response.json();
+        $('#routeCode').value = code;
+        createForm.reset();
+        stopInputs.replaceChildren();
+        addStopRow();
+        addStopRow();
+        setCreateFormVisible(false);
+        renderRoute(createdStops, code);
+        setApiStatus(true, 'API conectada');
+        showNotice(`La ruta ${code} se creó correctamente.`, 'info');
+      } catch (error) {
+        const message = error instanceof TypeError
+          ? 'No se pudo conectar con la API. Verifica la URL, que el backend esté activo y que permita solicitudes desde este origen (CORS).'
+          : error.message;
+        showNotice(message);
+        if (error.status === 401) {
+          jwt = '';
+          $('#authMessage').textContent = 'Sesión expirada. Inicia sesión nuevamente.';
+          setApiStatus(false, 'Sesión expirada');
+        }
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Crear ruta';
+      }
+    });
+
+    function googleMapsDirectionsUrl(points) {
+      const params = new URLSearchParams({
+        api: '1',
+        origin: points[0],
+        destination: points[points.length - 1],
+        travelmode: 'driving'
+      });
+      if (points.length > 2) params.set('waypoints', points.slice(1, -1).join('|'));
+      return `https://www.google.com/maps/dir/?${params.toString()}`;
+    }
+
+    function renderRouteMap(stops, routeCode) {
+      const panel = $('#routeMap');
+      const frame = $('#mapFrame');
+      const mapApiKey = $('#mapsApiKey').value.trim();
+      const points = stops.map((stop) => {
+        if (stop.latitud != null && stop.longitud != null
+                && Number.isFinite(Number(stop.latitud)) && Number.isFinite(Number(stop.longitud))) {
+          return `${stop.latitud},${stop.longitud}`;
+        }
+        return String(stop.ubicacion || '').trim();
+      }).filter(Boolean);
+
+      panel.hidden = false;
+      $('#mapRouteLabel').textContent = routeCode;
+      const externalLink = $('#mapExternalLink');
+      externalLink.hidden = points.length < 2;
+      if (points.length >= 2) externalLink.href = googleMapsDirectionsUrl(points);
+
+      if (points.length < 2) {
+        frame.hidden = true;
+        frame.removeAttribute('src');
+        $('#mapMessage').textContent = 'Se necesitan al menos dos paradas con ubicación para mostrar el recorrido.';
+        return;
+      }
+      if (!mapApiKey) {
+        const legacyParams = new URLSearchParams({
+          f: 'd',
+          source: 's_d',
+          saddr: points[0],
+          daddr: points.slice(1).join(' to:'),
+          dirflg: 'd',
+          output: 'embed'
+        });
+        frame.src = `https://www.google.com/maps?${legacyParams.toString()}`;
+        frame.title = `Mapa de la ruta ${routeCode}`;
+        frame.hidden = false;
+        $('#mapMessage').textContent = 'Mapa interactivo de Google Maps con origen, paradas y destino del recorrido.';
+        return;
+      }
+
+      const params = new URLSearchParams({
+        key: mapApiKey,
+        origin: points[0],
+        destination: points[points.length - 1],
+        mode: 'driving'
+      });
+      if (points.length > 2) params.set('waypoints', points.slice(1, -1).join('|'));
+      frame.src = `https://www.google.com/maps/embed/v1/directions?${params.toString()}`;
+      frame.title = `Mapa de la ruta ${routeCode}`;
+      frame.hidden = false;
+      $('#mapMessage').textContent = `Recorrido con ${points.length} paradas en modo conducción.`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[character]);
+    }
+
+    function renderRoute(stops, searchedCode) {
+      const ordered = [...stops].sort((a, b) => (a.ordenParada ?? 0) - (b.ordenParada ?? 0));
+      const routeCode = ordered[0]?.codigoRuta || searchedCode;
+      const driverIds = [...new Set(ordered.map((stop) => stop.idpersona).filter((id) => id != null))];
+      const vehicleIds = [...new Set(ordered.map((stop) => stop.idvehiculo).filter((id) => id != null))];
+
+      $('#resultTitle').textContent = `Ruta ${routeCode}`;
+      $('#resultSubtitle').textContent = 'Paradas organizadas según el orden del recorrido';
+      $('#stopCount').textContent = `${ordered.length} ${ordered.length === 1 ? 'parada' : 'paradas'}`;
+      activeRouteStops = ordered;
+      activeRouteCode = routeCode;
+      renderRouteMap(ordered, routeCode);
+      $('#stopList').innerHTML = ordered.map((stop, index) => {
+        const firstLast = index === 0 ? 'Origen' : index === ordered.length - 1 ? 'Destino' : 'Parada intermedia';
+        const hasCoordinates = stop.latitud != null && stop.longitud != null
+          && Number.isFinite(Number(stop.latitud)) && Number.isFinite(Number(stop.longitud));
+        const coordinates = hasCoordinates
+          ? `<p class="coordinates">${escapeHtml(stop.latitud)}, ${escapeHtml(stop.longitud)}</p>`
+          : '<p class="coordinates">Coordenadas no disponibles</p>';
+        const mapLink = hasCoordinates
+          ? `<a class="map-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${stop.latitud},${stop.longitud}`)}" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.8"/></svg>Ver en el mapa</a>`
+          : '';
+        return `<article class="stop"><div class="stop-marker">${escapeHtml(stop.ordenParada ?? index + 1)}</div><div><p class="stop-type">${firstLast}</p><p class="stop-name">${escapeHtml(stop.ubicacion || 'Ubicación sin nombre')}</p>${coordinates}${mapLink}</div></article>`;
+      }).join('');
+
+      $('#routeSummary').innerHTML = `<p class="summary-title">Resumen del recorrido</p><div class="summary-code">${escapeHtml(routeCode)}</div><div class="summary-divider"></div><div class="summary-item"><span>Paradas</span><span>${ordered.length}</span></div><div class="summary-item"><span>Conductor</span><span>${driverIds.length ? driverIds.map(escapeHtml).join(', ') : '—'}</span></div><div class="summary-item"><span>Vehículo</span><span>${vehicleIds.length ? vehicleIds.map(escapeHtml).join(', ') : '—'}</span></div>`;
+      results.classList.add('visible');
+      emptyState.style.display = 'none';
+      clearNotice();
+      results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    $('#mapsApiKey').addEventListener('input', () => {
+      if (activeRouteStops.length) renderRouteMap(activeRouteStops, activeRouteCode);
+    });
+
+    $('#toggleSettings').addEventListener('click', () => {
+      const body = $('#connectionForm');
+      const isExpanded = $('#toggleSettings').getAttribute('aria-expanded') === 'true';
+      body.hidden = isExpanded;
+      $('#toggleSettings').setAttribute('aria-expanded', String(!isExpanded));
+      $('#toggleSettings').textContent = isExpanded ? 'Mostrar' : 'Ocultar';
+    });
+
+    apiBaseInput.addEventListener('input', () => {
+      if (jwt) {
+        jwt = '';
+        $('#authMessage').textContent = 'La URL cambió. Inicia sesión otra vez.';
+        $('#connectionSubtitle').textContent = 'API y credenciales de acceso';
+        setApiStatus(false, 'Sin conexión');
+      }
+    });
+  </script>
+</body>
+</html>

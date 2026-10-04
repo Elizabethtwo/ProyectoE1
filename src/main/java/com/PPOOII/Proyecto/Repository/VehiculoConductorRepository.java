@@ -16,6 +16,8 @@ public interface VehiculoConductorRepository extends JpaRepository<VehiculoCondu
 
     Optional<VehiculoConductor> findByVehiculoIdAndPersonaId(Long vehiculoId, Long personaId);
 
+    List<VehiculoConductor> findByPersona_Id(Long personaId);
+
     @Query("SELECT DISTINCT vc.persona FROM VehiculoConductor vc " +
            "WHERE vc.estadoConductor = 'PO' AND vc.persona.tipoPersona = 'C'")
     List<Persona> findOperableDrivers();

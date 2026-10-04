@@ -14,5 +14,8 @@ public interface VehiculoDocumentoRepository extends JpaRepository<VehiculoDocum
 
     List<VehiculoDocumento> findByEstado(String estado);
 
+    List<VehiculoDocumento> findByFechaVencimientoBeforeAndEstadoNot(
+            java.time.LocalDate fecha, String estado);
+
     java.util.Optional<VehiculoDocumento> findByVehiculoIdAndDocumentoId(Long idVehiculo, Long idDocumento);
 }
