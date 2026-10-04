@@ -86,6 +86,59 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
 
     @Override
+    public boolean cambiarPassword(String login, String nuevaPassword) {
+        try {
+            if (login == null || login.isBlank()) {
+                logger.error("ERROR CAMBIAR_PASSWORD: El login es obligatorio.");
+                return false;
+            }
+            if (nuevaPassword == null || nuevaPassword.isBlank()) {
+                logger.error("ERROR CAMBIAR_PASSWORD: La nueva contraseña es obligatoria.");
+                return false;
+            }
+
+            Usuario usuario = usuarioRepository.findById_Login(login).orElse(null);
+            if (usuario == null) {
+                logger.error("ERROR CAMBIAR_PASSWORD: No existe el usuario con login " + login);
+                return false;
+            }
+
+            usuario.setPassword(nuevaPassword);
+            usuarioRepository.save(usuario);
+            logger.info("PASSWORD_ACTUALIZADA: " + login);
+            return true;
+        } catch (Exception e) {
+            logger.error("ERROR CAMBIAR_PASSWORD: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public String regenerarApikey(String login) {
+        try {
+            if (login == null || login.isBlank()) {
+                logger.error("ERROR REGENERAR_APIKEY: El login es obligatorio.");
+                return null;
+            }
+
+            Usuario usuario = usuarioRepository.findById_Login(login).orElse(null);
+            if (usuario == null) {
+                logger.error("ERROR REGENERAR_APIKEY: No existe el usuario con login " + login);
+                return null;
+            }
+
+            String nuevoApikey = java.util.UUID.randomUUID().toString();
+            usuario.setApikey(nuevoApikey);
+            usuarioRepository.save(usuario);
+            logger.info("APIKEY_REGENERADA: " + login);
+            return nuevoApikey;
+        } catch (Exception e) {
+            logger.error("ERROR REGENERAR_APIKEY: " + e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
     public Usuario findById(UsuarioPersonaId id) {
         try {
             return usuarioRepository.findById(id).orElse(null);

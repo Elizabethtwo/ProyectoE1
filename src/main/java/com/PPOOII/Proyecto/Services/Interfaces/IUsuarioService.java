@@ -15,6 +15,10 @@ public interface IUsuarioService {
     boolean eliminar(UsuarioPersonaId id);
     List<Usuario> consultarUsuarios(Pageable pageable);
 
+    // Operaciones de seguridad
+    boolean cambiarPassword(String login, String nuevaPassword);
+    String regenerarApikey(String login);
+
     // Busquedas
     Usuario findById(UsuarioPersonaId id);
     Usuario findByLogin(String login);

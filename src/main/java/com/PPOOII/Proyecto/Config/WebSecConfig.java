@@ -9,8 +9,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.PPOOII.Proyecto.Config.Model.Constants;
-
 @EnableWebSecurity
 @Configuration
 public class WebSecConfig {
@@ -25,10 +23,19 @@ public class WebSecConfig {
                 .authorizeHttpRequests( authz -> authz
                         .requestMatchers("/auth").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(
+                            HttpMethod.GET,
+                            "/v1/vehiculos/documentos-vencidos",
+                            "/v1/conductores/operables",
+                            "/v1/vehiculo/placa/*",
+                            "/v1/vehiculos/documentos-por-vencer",
+                            "/v1/personas/total-por-tipo",
+                            "/v1/vehiculo/estado/Vencido"
+                        ).permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-    
+
 }

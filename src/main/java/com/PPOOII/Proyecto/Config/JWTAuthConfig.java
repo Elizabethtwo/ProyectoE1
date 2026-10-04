@@ -2,7 +2,6 @@ package com.PPOOII.Proyecto.Config;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 
@@ -36,5 +35,5 @@ public class JWTAuthConfig {
     public static byte[] getSigningKey(String secretKey) {
         return secretKey.getBytes();
     }
-    
+
 }

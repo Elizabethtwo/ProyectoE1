@@ -34,6 +34,13 @@ public class VehiculoDocumento implements Serializable {
     @Column(name = "FECHA_VENCIMIENTO", nullable = false)
     private LocalDate fechaVencimiento;
 
+    @Column(name = "NOMBRE_ARCHIVO", length = 255)
+    private String nombreArchivo;
+
+    @Lob
+    @Column(name = "ARCHIVO_BASE64", columnDefinition = "TEXT")
+    private String archivoBase64;
+
     /**
      * Habilitado | Vencido | En Verificacion
      * Estado inicial al crear un vehículo: "En Verificacion"
@@ -70,6 +77,12 @@ public class VehiculoDocumento implements Serializable {
 
     public LocalDate getFechaVencimiento() { return fechaVencimiento; }
     public void setFechaVencimiento(LocalDate fechaVencimiento) { this.fechaVencimiento = fechaVencimiento; }
+
+    public String getNombreArchivo() { return nombreArchivo; }
+    public void setNombreArchivo(String nombreArchivo) { this.nombreArchivo = nombreArchivo; }
+
+    public String getArchivoBase64() { return archivoBase64; }
+    public void setArchivoBase64(String archivoBase64) { this.archivoBase64 = archivoBase64; }
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }

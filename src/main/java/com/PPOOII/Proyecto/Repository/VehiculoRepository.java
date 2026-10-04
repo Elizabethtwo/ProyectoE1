@@ -1,5 +1,6 @@
 package com.PPOOII.Proyecto.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,8 +17,12 @@ import com.PPOOII.Proyecto.Entities.Vehiculo;
 @Repository("IVehiculoRepo")
 public interface VehiculoRepository extends JpaRepository<Vehiculo, Long> {
 
-    // Buscar por placa
-    Optional<Vehiculo> findByPlaca(String placa);
+    // Buscar por placa e incluir sus documentos para la respuesta de consulta.
+    @Query("SELECT DISTINCT v FROM Vehiculo v " +
+           "LEFT JOIN FETCH v.documentos vd " +
+           "LEFT JOIN FETCH vd.documento " +
+           "WHERE v.placa = :placa")
+    Optional<Vehiculo> findByPlaca(@Param("placa") String placa);
 
     // Buscar por tipo de vehículo
     List<Vehiculo> findByTipoVehiculo(String tipoVehiculo);
@@ -33,6 +38,18 @@ public interface VehiculoRepository extends JpaRepository<Vehiculo, Long> {
            "JOIN v.documentos vd " +
            "WHERE vd.estado = :estado")
     List<Vehiculo> findByEstadoDocumento(@Param("estado") String estado);
+
+    @Query("SELECT DISTINCT v FROM Vehiculo v JOIN FETCH v.documentos vd " +
+           "LEFT JOIN FETCH vd.documento " +
+           "WHERE vd.estado = 'Vencido' OR vd.fechaVencimiento < :hoy")
+    List<Vehiculo> findWithExpiredDocuments(@Param("hoy") LocalDate hoy);
+
+    @Query("SELECT DISTINCT v FROM Vehiculo v JOIN FETCH v.documentos vd " +
+           "LEFT JOIN FETCH vd.documento " +
+           "WHERE vd.fechaVencimiento >= :desde AND vd.fechaVencimiento <= :hasta")
+    List<Vehiculo> findWithDocumentsExpiringBetween(
+            @Param("desde") LocalDate desde,
+            @Param("hasta") LocalDate hasta);
 
     // Listado paginado
     @NonNull

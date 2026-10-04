@@ -18,7 +18,7 @@ public class Usuario implements Serializable {
 	@ManyToOne(optional = false)
     @JoinColumn(name = "idpersona", referencedColumnName = "id", insertable = false, updatable = false)
 	private Persona persona;
-	
+
 	@Column(name = "password", nullable = false, length = 255)
 	private String password;
 
@@ -58,4 +58,14 @@ public class Usuario implements Serializable {
 	public void setApikey(String apikey) {
 		this.apikey = apikey;
 	}
+
+	public Usuario() {}
+
+	public Usuario(UsuarioPersonaId id, Persona persona, String password, String apikey) {
+		this.id = id;
+		this.persona = persona;
+		this.password = password;
+		this.apikey = apikey;
+	}
+
 }

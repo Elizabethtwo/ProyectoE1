@@ -1,10 +1,12 @@
 package com.PPOOII.Proyecto.Controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +14,7 @@ import jakarta.validation.Valid;
 
 import com.PPOOII.Proyecto.Entities.Vehiculo;
 import com.PPOOII.Proyecto.Entities.VehiculoDocumento;
+import com.PPOOII.Proyecto.Repository.VehiculoConductorRepository;
 import com.PPOOII.Proyecto.Services.Interfaces.IVehiculoService;
 
 @RestController
@@ -22,6 +25,10 @@ public class VehiculoController {
     @Autowired
     @Qualifier("VehiculoService")
     private IVehiculoService vehiculoService;
+
+    @Autowired
+    @Qualifier("IVehiculoConductorRepo")
+    private VehiculoConductorRepository vehiculoConductorRepository;
 
     // POST: Crear vehículo (debe incluir al menos un documento)
     @PostMapping("/vehiculo")
@@ -55,8 +62,16 @@ public class VehiculoController {
 
     // GET: Buscar vehículo por placa 
     @GetMapping("/vehiculo/placa/{placa}")
-    public Vehiculo getByPlaca(@PathVariable("placa") String placa) {
-        return vehiculoService.findByPlaca(placa);
+    public ResponseEntity<?> getByPlaca(@PathVariable("placa") String placa) {
+        Vehiculo vehiculo = vehiculoService.findByPlaca(placa);
+        if (vehiculo == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "vehiculo", vehiculo,
+                "conductores", vehiculoConductorRepository.findByVehiclePlate(vehiculo.getPlaca())
+        ));
     }
 
     // GET: Buscar vehículos por tipo (Automovil / Motocicleta) 
