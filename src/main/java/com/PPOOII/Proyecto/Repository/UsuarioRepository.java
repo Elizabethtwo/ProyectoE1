@@ -16,4 +16,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UsuarioPersona
     Optional<Usuario> findByApikey(String apikey);
 
     boolean existsById_Login(String login);
+
+        Optional<Usuario> findById_IdPersona(Long idPersona);
 }

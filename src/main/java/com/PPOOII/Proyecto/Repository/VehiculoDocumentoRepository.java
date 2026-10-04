@@ -13,4 +13,6 @@ public interface VehiculoDocumentoRepository extends JpaRepository<VehiculoDocum
     List<VehiculoDocumento> findByVehiculoId(Long idVehiculo);
 
     List<VehiculoDocumento> findByEstado(String estado);
+
+    java.util.Optional<VehiculoDocumento> findByVehiculoIdAndDocumentoId(Long idVehiculo, Long idDocumento);
 }

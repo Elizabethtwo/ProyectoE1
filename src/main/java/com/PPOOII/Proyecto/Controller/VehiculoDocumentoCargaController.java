@@ -1,6 +1,7 @@
 package com.PPOOII.Proyecto.Controller;
 
 import java.time.LocalDate;
+import java.util.Base64;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import com.PPOOII.Proyecto.Entities.Vehiculo;
 import com.PPOOII.Proyecto.Entities.VehiculoDocumento;
 import com.PPOOII.Proyecto.Repository.DocumentoRepository;
 import com.PPOOII.Proyecto.Repository.VehiculoRepository;
+import com.PPOOII.Proyecto.Repository.VehiculoDocumentoRepository;
 
 @RestController
 @RequestMapping("/v1")
@@ -30,6 +32,10 @@ public class VehiculoDocumentoCargaController {
     @Autowired
     @Qualifier("IVehiculoRepo")
     private VehiculoRepository vehiculoRepository;
+
+    @Autowired
+    @Qualifier("IVehiculoDocumentoRepo")
+    private VehiculoDocumentoRepository vehiculoDocumentoRepository;
 
     @PostMapping("/vehiculo/documentos")
     public ResponseEntity<?> cargarDocumentosVehiculo(@RequestBody List<Map<String, Object>> payload) {
@@ -52,6 +58,19 @@ public class VehiculoDocumentoCargaController {
                 continue;
             }
 
+            byte[] archivoPdf;
+            try {
+                archivoPdf = Base64.getDecoder().decode(archivoBase64);
+            } catch (IllegalArgumentException e) {
+                resultado.add(Map.of("ok", false, "error", "El documento no contiene un Base64 válido"));
+                continue;
+            }
+            if (archivoPdf.length < 5 || archivoPdf[0] != '%' || archivoPdf[1] != 'P'
+                    || archivoPdf[2] != 'D' || archivoPdf[3] != 'F' || archivoPdf[4] != '-') {
+                resultado.add(Map.of("ok", false, "error", "El archivo debe ser un PDF"));
+                continue;
+            }
+
             Vehiculo vehiculo = vehiculoRepository.findById(idVehiculo).orElse(null);
             Documento documento = documentoRepository.findById(idDocumento).orElse(null);
             if (vehiculo == null || documento == null) {
@@ -59,23 +78,31 @@ public class VehiculoDocumentoCargaController {
                 continue;
             }
 
-            VehiculoDocumento relacion = new VehiculoDocumento();
+            VehiculoDocumento relacion = vehiculoDocumentoRepository
+                    .findByVehiculoIdAndDocumentoId(idVehiculo, idDocumento)
+                    .orElseGet(VehiculoDocumento::new);
             relacion.setVehiculo(vehiculo);
             relacion.setDocumento(documento);
-            relacion.setFechaExpedicion(LocalDate.parse(fechaExpedicion != null ? fechaExpedicion : LocalDate.now().toString()));
-            relacion.setFechaVencimiento(LocalDate.parse(fechaVencimiento != null ? fechaVencimiento : LocalDate.now().plusYears(1).toString()));
+            try {
+                relacion.setFechaExpedicion(LocalDate.parse(
+                        fechaExpedicion != null ? fechaExpedicion : LocalDate.now().toString()));
+                relacion.setFechaVencimiento(LocalDate.parse(
+                        fechaVencimiento != null ? fechaVencimiento : LocalDate.now().plusYears(1).toString()));
+            } catch (java.time.format.DateTimeParseException e) {
+                resultado.add(Map.of("ok", false, "error", "Las fechas deben tener formato AAAA-MM-DD"));
+                continue;
+            }
             relacion.setNombreArchivo(nombreArchivo);
-            relacion.setArchivoBase64(archivoBase64);
+            relacion.setArchivoBase64(archivoPdf);
             relacion.setEstado("En Verificacion");
 
-            vehiculo.getDocumentos().add(relacion);
-            vehiculoRepository.save(vehiculo);
+            vehiculoDocumentoRepository.save(relacion);
 
             resultado.add(Map.of(
                     "ok", true,
                     "idVehiculo", idVehiculo,
                     "idDocumento", idDocumento,
-                    "nombreArchivo", nombreArchivo,
+                    "nombreArchivo", nombreArchivo == null ? "" : nombreArchivo,
                     "estado", "En Verificacion"
             ));
         }

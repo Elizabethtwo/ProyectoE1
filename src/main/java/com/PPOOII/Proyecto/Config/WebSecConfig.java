@@ -9,12 +9,17 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.PPOOII.Proyecto.Repository.UsuarioRepository;
+
 @EnableWebSecurity
 @Configuration
 public class WebSecConfig {
 
     @Autowired
     JWTAuthFilter jwtAuthorizationFilter;
+
+    @Autowired
+    UsuarioRepository usuarioRepository;
 
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
@@ -29,11 +34,12 @@ public class WebSecConfig {
                             "/v1/conductores/operables",
                             "/v1/vehiculo/placa/*",
                             "/v1/vehiculos/documentos-por-vencer",
-                            "/v1/personas/total-por-tipo",
-                            "/v1/vehiculo/estado/Vencido"
+                            "/v1/personas/total-por-tipo"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/**").authenticated()
                         .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new APIKeyAuthFilter(usuarioRepository), JWTAuthFilter.class);
 
         return http.build();
     }

@@ -26,14 +26,11 @@ public class JWTAuthConfig {
                                 .collect(Collectors.toList()))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS512, getSigningKey(SUPER_SECRET_KEY))
+                .signWith(getSigningKey(SUPER_SECRET_KEY), SignatureAlgorithm.HS512)
                 .compact();
 
         return TOKEN_BEARER_PREFIX + token;
     }
 
-    public static byte[] getSigningKey(String secretKey) {
-        return secretKey.getBytes();
-    }
 
 }

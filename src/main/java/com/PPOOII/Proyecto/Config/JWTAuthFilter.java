@@ -20,10 +20,8 @@ import static com.PPOOII.Proyecto.Config.Model.Constants.*;
 @Component
 public class JWTAuthFilter extends OncePerRequestFilter {
 
-    private Claims setSigningKey(HttpServletRequest request) {
-		String jwtToken = request.
-				getHeader(HEADER_AUTHORIZACION_KEY).
-				replace(TOKEN_BEARER_PREFIX, "");
+    	private Claims parseToken(String authorizationHeader) {
+		String jwtToken = authorizationHeader.substring(TOKEN_BEARER_PREFIX.length());
 
 		return Jwts.parserBuilder()
 				.setSigningKey(getSigningKey(SUPER_SECRET_KEY))
@@ -44,34 +42,29 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
 	}
 
-	private boolean isJWTValid(HttpServletRequest request, HttpServletResponse res) {
-		String authenticationHeader = request.getHeader(HEADER_AUTHORIZACION_KEY);
-		if (authenticationHeader == null || !authenticationHeader.startsWith(TOKEN_BEARER_PREFIX))
-			return false;
-		return true;
-	}
-
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-		try {
-			if (isJWTValid(request, response)) {
-				Claims claims = setSigningKey(request);
-				if (claims.get("authorities") != null) {
-					setAuthentication(claims);
-				} else {
-					SecurityContextHolder.clearContext();
-				}
-			} else {
-				SecurityContextHolder.clearContext();
-			}
+		String authorizationHeader = request.getHeader(HEADER_AUTHORIZACION_KEY);
+		if (authorizationHeader == null || !authorizationHeader.startsWith(TOKEN_BEARER_PREFIX)) {
 			filterChain.doFilter(request, response);
-		} catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException e) {
-			SecurityContextHolder.clearContext();
-			filterChain.doFilter(request, response);
-		} catch (Exception e) {
-			SecurityContextHolder.clearContext();
-			filterChain.doFilter(request, response);
+			return;
 		}
+
+		try {
+			Claims claims = parseToken(authorizationHeader);
+			if (claims.get("authorities") == null) {
+				SecurityContextHolder.clearContext();
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT is missing authorities");
+				return;
+			}
+			setAuthentication(claims);
+		} catch (JwtException | IllegalArgumentException e) {
+			SecurityContextHolder.clearContext();
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT");
+			return;
+		}
+
+		filterChain.doFilter(request, response);
 	}
 
 }

@@ -1,7 +1,9 @@
 package com.PPOOII.Proyecto.Services;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -9,6 +11,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.PPOOII.Proyecto.Entities.Persona;
 import com.PPOOII.Proyecto.Entities.Vehiculo;
@@ -54,8 +58,9 @@ public class VehiculoConductorServiceImpl implements IVehiculoConductorService {
                     .findByVehiculoIdAndPersonaId(idVehiculo, idPersona)
                     .orElse(null);
 
-            if (relacion == null) {
-                logger.error("ERROR CAMBIAR_ESTADO_CONDUCTOR: No existe relación entre vehículo " + idVehiculo + " y persona " + idPersona);
+            if (relacion == null || relacion.getPersona() == null
+                                || !"C".equals(relacion.getPersona().getTipoPersona())) {
+                logger.error("ERROR CAMBIAR_ESTADO_CONDUCTOR: No existe una relación válida con un conductor");
                 return false;
             }
 
@@ -70,6 +75,7 @@ public class VehiculoConductorServiceImpl implements IVehiculoConductorService {
     }
 
     @Override
+    @Transactional
     public boolean asociarVehiculos(long idPersona, List<Long> idsVehiculos) {
         try {
             if (idsVehiculos == null || idsVehiculos.isEmpty()) {
@@ -78,29 +84,32 @@ public class VehiculoConductorServiceImpl implements IVehiculoConductorService {
             }
 
             Persona persona = personaRepository.findById(idPersona).orElse(null);
-            if (persona == null) {
-                logger.error("ERROR ASOCIAR_VEHICULOS: No existe la persona con ID " + idPersona);
+            if (persona == null || !"C".equals(persona.getTipoPersona())) {
+                logger.error("ERROR ASOCIAR_VEHICULOS: La persona no existe o no es conductor");
                 return false;
             }
 
+            Map<Long, Vehiculo> vehiculos = new HashMap<>();
             for (Long idVehiculo : idsVehiculos) {
                 if (idVehiculo == null || idVehiculo <= 0) {
                     logger.error("ERROR ASOCIAR_VEHICULOS: ID de vehículo inválido: " + idVehiculo);
                     return false;
                 }
-
                 Vehiculo vehiculo = vehiculoRepository.findById(idVehiculo).orElse(null);
                 if (vehiculo == null) {
                     logger.error("ERROR ASOCIAR_VEHICULOS: No existe vehículo con ID " + idVehiculo);
                     return false;
                 }
+                vehiculos.put(idVehiculo, vehiculo);
+            }
 
+            for (Long idVehiculo : idsVehiculos) {
                 if (vehiculoConductorRepository.findByVehiculoIdAndPersonaId(idVehiculo, idPersona).isPresent()) {
                     continue;
                 }
 
                 VehiculoConductor relacion = new VehiculoConductor();
-                relacion.setVehiculo(vehiculo);
+                relacion.setVehiculo(vehiculos.get(idVehiculo));
                 relacion.setPersona(persona);
                 relacion.setFechaAsociacion(LocalDate.now());
                 relacion.setEstadoConductor("EA");
@@ -110,6 +119,7 @@ public class VehiculoConductorServiceImpl implements IVehiculoConductorService {
             logger.info("VEHICULOS_ASOCIADOS: persona=" + idPersona + ", cantidad=" + idsVehiculos.size());
             return true;
         } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             logger.error("ERROR ASOCIAR_VEHICULOS: " + e.getMessage(), e);
             return false;
         }

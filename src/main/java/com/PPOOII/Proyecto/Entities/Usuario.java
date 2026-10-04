@@ -5,17 +5,18 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "usuario", schema = "ppooii_proyecto")
+@Table(name = "usuario", schema = "ppooii_proyecto",
+		uniqueConstraints = @jakarta.persistence.UniqueConstraint(name = "uk_usuario_persona", columnNames = "idpersona"))
 public class Usuario implements Serializable {
 
 	@EmbeddedId
 	private UsuarioPersonaId id;
 
-	@ManyToOne(optional = false)
+	@jakarta.persistence.OneToOne(optional = false)
     @JoinColumn(name = "idpersona", referencedColumnName = "id", insertable = false, updatable = false)
 	private Persona persona;
 

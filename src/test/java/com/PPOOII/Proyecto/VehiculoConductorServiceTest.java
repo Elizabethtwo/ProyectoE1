@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.PPOOII.Proyecto.Entities.Persona;
 import com.PPOOII.Proyecto.Entities.VehiculoConductor;
 import com.PPOOII.Proyecto.Repository.VehiculoConductorRepository;
 import com.PPOOII.Proyecto.Services.VehiculoConductorServiceImpl;
@@ -31,6 +32,9 @@ class VehiculoConductorServiceTest {
     void cambiarEstado_conEstadoValido_actualizaRelacion() {
         VehiculoConductor relacion = new VehiculoConductor();
         relacion.setEstadoConductor("EA");
+        Persona conductor = new Persona();
+        conductor.setTipoPersona("C");
+        relacion.setPersona(conductor);
 
         when(vehiculoConductorRepository.findByVehiculoIdAndPersonaId(10L, 20L))
             .thenReturn(Optional.of(relacion));
